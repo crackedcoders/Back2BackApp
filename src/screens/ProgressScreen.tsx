@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -6,230 +6,285 @@ import {
   ScrollView,
   TouchableOpacity,
   Dimensions,
+  FlatList,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Feather';
-import Svg, { Path, Circle, Text as SvgText } from 'react-native-svg';
+import Svg, { Path, Circle, Text as SvgText, Line } from 'react-native-svg';
 import { theme } from '../theme';
+import { Card } from '../components/Card';
 
 const { width } = Dimensions.get('window');
 
-// Mock data for the chart
-const chartData = [
-  { day: 'Mon', visits: 1 },
-  { day: 'Tue', visits: 0 },
-  { day: 'Wed', visits: 1 },
-  { day: 'Thu', visits: 1 },
-  { day: 'Fri', visits: 0 },
-  { day: 'Sat', visits: 1 },
-  { day: 'Sun', visits: 1 },
+// Mock data
+const workoutHistory = [
+  { id: '1', date: 'Dec 28', name: 'Power Lift', duration: '45 min' },
+  { id: '2', date: 'Dec 27', name: 'Open Gym', duration: '60 min' },
+  { id: '3', date: 'Dec 26', name: 'HIIT Circuit', duration: '30 min' },
+  { id: '4', date: 'Dec 24', name: 'CrossFit', duration: '55 min' },
+  { id: '5', date: 'Dec 23', name: 'Open Gym', duration: '40 min' },
 ];
 
 const personalRecords = [
-  { title: 'Longest Streak', value: '32 days', icon: 'trending-up' },
-  { title: 'Total Visits', value: '156', icon: 'activity' },
-  { title: 'Best Month', value: 'March 2024', icon: 'award' },
-  { title: 'Weekly Average', value: '4.5 days', icon: 'bar-chart-2' },
+  { name: 'Squat', weight: '315 lbs' },
+  { name: 'Deadlift', weight: '405 lbs' },
+  { name: 'Bench', weight: '225 lbs' },
+  { name: 'Clean', weight: '185 lbs' },
+  { name: 'Snatch', weight: '155 lbs' },
+  { name: 'Press', weight: '135 lbs' },
+];
+
+const bodyStats = [
+  { label: 'Weight', value: '185 lbs', icon: 'activity' },
+  { label: 'Body Fat', value: '15%', icon: 'percent' },
+  { label: 'Muscle Mass', value: '156 lbs', icon: 'trending-up' },
+];
+
+const milestones = [
+  { label: '100 Visits', achieved: true },
+  { label: '10 PRs', achieved: true },
+  { label: '7-Day Streak', achieved: false },
+];
+
+// Chart data for total weight lifted (last 6 months)
+const weightChartData = [
+  { month: 'Jul', weight: 12500 },
+  { month: 'Aug', weight: 13200 },
+  { month: 'Sep', weight: 13800 },
+  { month: 'Oct', weight: 14500 },
+  { month: 'Nov', weight: 15200 },
+  { month: 'Dec', weight: 16000 },
 ];
 
 export const ProgressScreen = () => {
-  const [timeRange, setTimeRange] = useState<'week' | 'month'>('week');
-  const currentStreak = 7;
-  const weeklyGoal = 5;
+  const [activeTab, setActiveTab] = useState<'history' | 'prs' | 'stats' | 'milestones'>('history');
+  const scrollViewRef = useRef<ScrollView>(null);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      scrollViewRef.current?.scrollTo({ y: 0, animated: false });
+    }, [])
+  );
 
   // Calculate chart dimensions
   const chartHeight = 200;
-  const chartWidth = width - theme.spacing.xl * 2;
-  const maxValue = Math.max(...chartData.map(d => d.visits));
-  const xStep = chartWidth / (chartData.length - 1);
+  const chartWidth = width - theme.spacing.xl * 2 - theme.spacing.lg * 2;
+  const maxWeight = Math.max(...weightChartData.map(d => d.weight));
+  const minWeight = Math.min(...weightChartData.map(d => d.weight));
+  const xStep = chartWidth / (weightChartData.length - 1);
 
   // Create path for line chart
-  const linePath = chartData
+  const linePath = weightChartData
     .map((point, index) => {
       const x = index * xStep;
-      const y = chartHeight - (point.visits / (maxValue || 1)) * (chartHeight - 40);
+      const y = chartHeight - ((point.weight - minWeight) / (maxWeight - minWeight)) * (chartHeight - 40);
       return `${index === 0 ? 'M' : 'L'} ${x} ${y}`;
     })
     .join(' ');
 
-  // Calculate streak gauge angle
-  const streakPercentage = (currentStreak / weeklyGoal) * 100;
-  const streakAngle = (streakPercentage / 100) * 270; // 270 degrees for 3/4 circle
+  const renderWorkoutHistory = () => (
+    <View style={styles.section}>
+      <Text style={styles.sectionTitle}>Workout History</Text>
+      {workoutHistory.map((workout) => (
+        <View key={workout.id} style={styles.historyItem}>
+          <View style={styles.historyLeft}>
+            <Text style={styles.historyDate}>{workout.date}</Text>
+            <Text style={styles.historyName}>{workout.name}</Text>
+          </View>
+          <Text style={styles.historyDuration}>{workout.duration}</Text>
+        </View>
+      ))}
+    </View>
+  );
+
+  const renderPersonalRecords = () => (
+    <View style={styles.section}>
+      <Text style={styles.sectionTitle}>Personal Records</Text>
+      <View style={styles.prGrid}>
+        {personalRecords.map((pr, index) => (
+          <Card key={index} style={styles.prCard}>
+            <Text style={styles.prName}>{pr.name}</Text>
+            <Text style={styles.prWeight}>{pr.weight}</Text>
+          </Card>
+        ))}
+      </View>
+    </View>
+  );
+
+  const renderStats = () => (
+    <>
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Total Weight Lifted</Text>
+        <View style={styles.chart}>
+          <Svg width={chartWidth} height={chartHeight}>
+            {/* Grid lines */}
+            {[0, 1, 2].map(i => (
+              <Line
+                key={i}
+                x1={0}
+                y1={20 + i * 80}
+                x2={chartWidth}
+                y2={20 + i * 80}
+                stroke={theme.colors.charcoal}
+                strokeWidth="1"
+                strokeDasharray="5,5"
+              />
+            ))}
+            
+            {/* Line */}
+            <Path
+              d={linePath}
+              fill="none"
+              stroke={theme.colors.accentRed}
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            
+            {/* Points */}
+            {weightChartData.map((point, index) => {
+              const x = index * xStep;
+              const y = chartHeight - ((point.weight - minWeight) / (maxWeight - minWeight)) * (chartHeight - 40);
+              return (
+                <Circle
+                  key={index}
+                  cx={x}
+                  cy={y}
+                  r="5"
+                  fill={theme.colors.white}
+                  stroke={theme.colors.accentRed}
+                  strokeWidth="2"
+                />
+              );
+            })}
+            
+            {/* X-axis labels */}
+            {weightChartData.map((point, index) => (
+              <SvgText
+                key={index}
+                x={index * xStep}
+                y={chartHeight - 5}
+                fontSize="12"
+                fill={theme.colors.coolGrey}
+                textAnchor="middle"
+              >
+                {point.month}
+              </SvgText>
+            ))}
+          </Svg>
+        </View>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Body Stats</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          {bodyStats.map((stat, index) => (
+            <Card key={index} style={styles.statCard}>
+              <Icon name={stat.icon} size={24} color={theme.colors.accentRed} />
+              <Text style={styles.statValue}>{stat.value}</Text>
+              <Text style={styles.statLabel}>{stat.label}</Text>
+            </Card>
+          ))}
+        </ScrollView>
+      </View>
+    </>
+  );
+
+  const renderMilestones = () => (
+    <View style={styles.section}>
+      <Text style={styles.sectionTitle}>Milestones</Text>
+      <View style={styles.milestonesContainer}>
+        {milestones.map((milestone, index) => (
+          <View
+            key={index}
+            style={[
+              styles.milestoneBadge,
+              milestone.achieved && styles.milestoneBadgeAchieved,
+            ]}
+          >
+            <Icon
+              name={milestone.achieved ? 'check-circle' : 'circle'}
+              size={20}
+              color={milestone.achieved ? theme.colors.white : theme.colors.coolGrey}
+            />
+            <Text
+              style={[
+                styles.milestoneText,
+                milestone.achieved && styles.milestoneTextAchieved,
+              ]}
+            >
+              {milestone.label}
+            </Text>
+          </View>
+        ))}
+      </View>
+    </View>
+  );
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'history':
+        return renderWorkoutHistory();
+      case 'prs':
+        return renderPersonalRecords();
+      case 'stats':
+        return renderStats();
+      case 'milestones':
+        return renderMilestones();
+      default:
+        return null;
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView
+        ref={scrollViewRef}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
         {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.title}>Your Progress</Text>
-          <Text style={styles.subtitle}>Keep up the great work!</Text>
-        </View>
+        <Text style={styles.header}>Progress</Text>
 
-        {/* Streak Gauge */}
-        <View style={styles.streakContainer}>
-          <Svg width={180} height={180} viewBox="0 0 180 180">
-            {/* Background arc */}
-            <Path
-              d="M 30 150 A 60 60 0 1 1 150 150"
-              fill="none"
-              stroke={theme.colors.charcoal}
-              strokeWidth="12"
-              strokeLinecap="round"
-            />
-            {/* Progress arc */}
-            <Path
-              d={`M 30 150 A 60 60 0 ${streakAngle > 180 ? 1 : 0} 1 ${
-                90 + 60 * Math.cos((Math.PI * (270 - streakAngle)) / 180)
-              } ${
-                90 - 60 * Math.sin((Math.PI * (270 - streakAngle)) / 180)
-              }`}
-              fill="none"
-              stroke={theme.colors.accentRed}
-              strokeWidth="12"
-              strokeLinecap="round"
-            />
-            {/* Center text */}
-            <SvgText
-              x="90"
-              y="85"
-              fontSize="36"
-              fontWeight="bold"
-              fill={theme.colors.white}
-              textAnchor="middle"
-            >
-              {currentStreak}
-            </SvgText>
-            <SvgText
-              x="90"
-              y="110"
-              fontSize="14"
-              fill={theme.colors.coolGrey}
-              textAnchor="middle"
-            >
-              day streak
-            </SvgText>
-          </Svg>
-          <Text style={styles.streakGoal}>Goal: {weeklyGoal} days/week</Text>
-        </View>
-
-        {/* Time Range Toggle */}
-        <View style={styles.toggleContainer}>
+        {/* Segmented Control */}
+        <View style={styles.segmentedControl}>
           <TouchableOpacity
-            style={[
-              styles.toggleButton,
-              timeRange === 'week' && styles.toggleButtonActive,
-            ]}
-            onPress={() => setTimeRange('week')}
+            style={[styles.segment, activeTab === 'history' && styles.segmentActive]}
+            onPress={() => setActiveTab('history')}
           >
-            <Text
-              style={[
-                styles.toggleText,
-                timeRange === 'week' && styles.toggleTextActive,
-              ]}
-            >
-              Week
+            <Text style={[styles.segmentText, activeTab === 'history' && styles.segmentTextActive]}>
+              History
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[
-              styles.toggleButton,
-              timeRange === 'month' && styles.toggleButtonActive,
-            ]}
-            onPress={() => setTimeRange('month')}
+            style={[styles.segment, activeTab === 'prs' && styles.segmentActive]}
+            onPress={() => setActiveTab('prs')}
           >
-            <Text
-              style={[
-                styles.toggleText,
-                timeRange === 'month' && styles.toggleTextActive,
-              ]}
-            >
-              Month
+            <Text style={[styles.segmentText, activeTab === 'prs' && styles.segmentTextActive]}>
+              PRs
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.segment, activeTab === 'stats' && styles.segmentActive]}
+            onPress={() => setActiveTab('stats')}
+          >
+            <Text style={[styles.segmentText, activeTab === 'stats' && styles.segmentTextActive]}>
+              Stats
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.segment, activeTab === 'milestones' && styles.segmentActive]}
+            onPress={() => setActiveTab('milestones')}
+          >
+            <Text style={[styles.segmentText, activeTab === 'milestones' && styles.segmentTextActive]}>
+              Milestones
             </Text>
           </TouchableOpacity>
         </View>
 
-        {/* Line Chart */}
-        <View style={styles.chartContainer}>
-          <Text style={styles.chartTitle}>Gym Visits</Text>
-          <View style={styles.chart}>
-            <Svg width={chartWidth} height={chartHeight}>
-              {/* Grid lines */}
-              {[0, 1].map(i => (
-                <Path
-                  key={i}
-                  d={`M 0 ${i === 0 ? 40 : chartHeight - 20} L ${chartWidth} ${
-                    i === 0 ? 40 : chartHeight - 20
-                  }`}
-                  stroke={theme.colors.charcoal}
-                  strokeWidth="1"
-                  strokeDasharray="5,5"
-                />
-              ))}
-              
-              {/* Line */}
-              <Path
-                d={linePath}
-                fill="none"
-                stroke={theme.colors.accentRed}
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              
-              {/* Points */}
-              {chartData.map((point, index) => {
-                const x = index * xStep;
-                const y = chartHeight - (point.visits / (maxValue || 1)) * (chartHeight - 40);
-                return (
-                  <Circle
-                    key={index}
-                    cx={x}
-                    cy={y}
-                    r="5"
-                    fill={theme.colors.white}
-                    stroke={theme.colors.accentRed}
-                    strokeWidth="2"
-                  />
-                );
-              })}
-              
-              {/* X-axis labels */}
-              {chartData.map((point, index) => (
-                <SvgText
-                  key={index}
-                  x={index * xStep}
-                  y={chartHeight + 5}
-                  fontSize="12"
-                  fill={theme.colors.coolGrey}
-                  textAnchor="middle"
-                >
-                  {point.day}
-                </SvgText>
-              ))}
-            </Svg>
-          </View>
-        </View>
-
-        {/* Personal Records */}
-        <View style={styles.recordsContainer}>
-          <Text style={styles.recordsTitle}>Personal Records</Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.recordsScroll}
-          >
-            {personalRecords.map((record, index) => (
-              <View key={index} style={styles.recordCard}>
-                <Icon name={record.icon} size={24} color={theme.colors.accentRed} />
-                <Text style={styles.recordValue}>{record.value}</Text>
-                <Text style={styles.recordLabel}>{record.title}</Text>
-              </View>
-            ))}
-          </ScrollView>
-        </View>
+        {/* Dynamic Content */}
+        {renderContent()}
       </ScrollView>
     </SafeAreaView>
   );
@@ -241,32 +296,16 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.black,
   },
   scrollContent: {
-    paddingBottom: theme.spacing.xxxl,
+    paddingBottom: theme.spacing.xxxl * 2,
   },
   header: {
-    paddingHorizontal: theme.spacing.xl,
-    paddingTop: theme.spacing.xl,
-    marginBottom: theme.spacing.xxl,
-  },
-  title: {
     ...theme.typography.heading.h1,
     color: theme.colors.white,
-    marginBottom: theme.spacing.xs,
+    textAlign: 'center',
+    marginTop: theme.spacing.xl,
+    marginBottom: theme.spacing.xl,
   },
-  subtitle: {
-    ...theme.typography.body.regular,
-    color: theme.colors.coolGrey,
-  },
-  streakContainer: {
-    alignItems: 'center',
-    marginBottom: theme.spacing.xxl,
-  },
-  streakGoal: {
-    ...theme.typography.body.small,
-    color: theme.colors.coolGrey,
-    marginTop: theme.spacing.md,
-  },
-  toggleContainer: {
+  segmentedControl: {
     flexDirection: 'row',
     marginHorizontal: theme.spacing.xl,
     marginBottom: theme.spacing.xl,
@@ -274,67 +313,121 @@ const styles = StyleSheet.create({
     borderRadius: theme.borderRadius.md,
     padding: 4,
   },
-  toggleButton: {
+  segment: {
     flex: 1,
     paddingVertical: theme.spacing.sm,
     alignItems: 'center',
     borderRadius: theme.borderRadius.sm,
   },
-  toggleButtonActive: {
+  segmentActive: {
     backgroundColor: theme.colors.accentRed,
   },
-  toggleText: {
-    ...theme.typography.body.regular,
+  segmentText: {
+    ...theme.typography.body.small,
     color: theme.colors.coolGrey,
     fontWeight: '600',
   },
-  toggleTextActive: {
+  segmentTextActive: {
     color: theme.colors.white,
   },
-  chartContainer: {
+  section: {
     paddingHorizontal: theme.spacing.xl,
     marginBottom: theme.spacing.xxl,
   },
-  chartTitle: {
+  sectionTitle: {
     ...theme.typography.heading.h3,
     color: theme.colors.white,
     marginBottom: theme.spacing.lg,
   },
-  chart: {
-    height: 250,
-    backgroundColor: theme.colors.charcoal,
-    borderRadius: theme.borderRadius.lg,
-    padding: theme.spacing.lg,
-    paddingBottom: theme.spacing.xl,
-  },
-  recordsContainer: {
-    paddingLeft: theme.spacing.xl,
-  },
-  recordsTitle: {
-    ...theme.typography.heading.h3,
-    color: theme.colors.white,
-    marginBottom: theme.spacing.lg,
-  },
-  recordsScroll: {
-    paddingRight: theme.spacing.xl,
-  },
-  recordCard: {
-    width: 140,
-    backgroundColor: theme.colors.charcoal,
-    borderRadius: theme.borderRadius.lg,
-    padding: theme.spacing.lg,
-    marginRight: theme.spacing.md,
+  historyItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
+    paddingVertical: theme.spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.charcoal,
   },
-  recordValue: {
-    ...theme.typography.heading.h3,
-    color: theme.colors.white,
-    marginTop: theme.spacing.sm,
-    marginBottom: theme.spacing.xs,
+  historyLeft: {
+    flex: 1,
   },
-  recordLabel: {
+  historyDate: {
     ...theme.typography.body.small,
     color: theme.colors.coolGrey,
-    textAlign: 'center',
+    marginBottom: theme.spacing.xs,
+  },
+  historyName: {
+    ...theme.typography.body.regular,
+    color: theme.colors.white,
+  },
+  historyDuration: {
+    ...theme.typography.body.regular,
+    color: theme.colors.accentRed,
+  },
+  prGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  prCard: {
+    width: '48%',
+    marginBottom: theme.spacing.md,
+    padding: theme.spacing.lg,
+    alignItems: 'center',
+  },
+  prName: {
+    ...theme.typography.body.regular,
+    color: theme.colors.coolGrey,
+    marginBottom: theme.spacing.sm,
+  },
+  prWeight: {
+    ...theme.typography.heading.h3,
+    color: theme.colors.white,
+    fontWeight: 'bold',
+  },
+  chart: {
+    backgroundColor: theme.colors.charcoal,
+    borderRadius: theme.borderRadius.lg,
+    padding: theme.spacing.lg,
+    paddingTop: theme.spacing.xl,
+  },
+  statCard: {
+    width: 120,
+    marginRight: theme.spacing.md,
+    padding: theme.spacing.lg,
+    alignItems: 'center',
+  },
+  statValue: {
+    ...theme.typography.heading.h3,
+    color: theme.colors.white,
+    marginVertical: theme.spacing.sm,
+  },
+  statLabel: {
+    ...theme.typography.body.small,
+    color: theme.colors.coolGrey,
+  },
+  milestonesContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  milestoneBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: theme.colors.charcoal,
+    paddingHorizontal: theme.spacing.lg,
+    paddingVertical: theme.spacing.md,
+    borderRadius: theme.borderRadius.xl,
+    marginRight: theme.spacing.sm,
+    marginBottom: theme.spacing.sm,
+  },
+  milestoneBadgeAchieved: {
+    backgroundColor: theme.colors.accentRed,
+  },
+  milestoneText: {
+    ...theme.typography.body.small,
+    color: theme.colors.coolGrey,
+    marginLeft: theme.spacing.sm,
+  },
+  milestoneTextAchieved: {
+    color: theme.colors.white,
   },
 });

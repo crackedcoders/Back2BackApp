@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Feather';
 import { theme } from '../theme';
 import { Card } from '../components/Card';
@@ -29,6 +30,13 @@ const menuItems = [
 ];
 
 export const ProfileScreen = () => {
+  const scrollViewRef = useRef<ScrollView>(null);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      scrollViewRef.current?.scrollTo({ y: 0, animated: false });
+    }, [])
+  );
   const handleMenuPress = (action: string) => {
     if (action === 'signout') {
       Alert.alert(
@@ -47,6 +55,7 @@ export const ProfileScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView
+        ref={scrollViewRef}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >

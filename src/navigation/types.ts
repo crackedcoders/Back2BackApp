@@ -1,10 +1,11 @@
 export type RootStackParamList = {
   Welcome: undefined;
-  Main: undefined;
+  Main: { userName?: string };
+  ClassDetail: { classId: string };
 };
 
 export type TabParamList = {
-  Home: undefined;
+  Home: { userName?: string };
   Classes: undefined;
   Door: undefined;
   Progress: undefined;

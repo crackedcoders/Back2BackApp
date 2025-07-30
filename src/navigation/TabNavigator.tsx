@@ -7,10 +7,16 @@ import { ClassesScreen } from '../screens/ClassesScreen';
 import { DoorScreen } from '../screens/DoorScreen';
 import { ProgressScreen } from '../screens/ProgressScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
+import { useRoute, RouteProp } from '@react-navigation/native';
+import { RootStackParamList } from './types';
 
 const Tab = createBottomTabNavigator();
 
+type TabNavigatorRouteProp = RouteProp<RootStackParamList, 'Main'>;
+
 export const TabNavigator = () => {
+  const route = useRoute<TabNavigatorRouteProp>();
+  const userName = route.params?.userName;
   return (
     <Tab.Navigator
       screenOptions={{
@@ -33,13 +39,14 @@ export const TabNavigator = () => {
     >
       <Tab.Screen
         name="Home"
-        component={HomeScreen}
         options={{
           tabBarIcon: ({ color }) => (
             <Icon name="home" color={color} size={24} />
           ),
         }}
-      />
+      >
+        {() => <HomeScreen userName={userName} />}
+      </Tab.Screen>
       <Tab.Screen
         name="Classes"
         component={ClassesScreen}

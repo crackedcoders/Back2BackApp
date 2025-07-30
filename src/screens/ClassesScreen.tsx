@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   FlatList,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
 import { theme } from '../theme';
@@ -19,54 +20,54 @@ interface ClassItem {
   coach: string;
   spotsAvailable: number;
   totalSpots: number;
-  type: 'strength' | 'cardio' | 'flex';
+  type: 'burn40' | 'crossfit' | 'burnbarbell';
 }
 
 const mockClasses: ClassItem[] = [
   {
     id: '1',
-    title: 'Power Lift',
+    title: 'Burn40 HIIT',
     time: '7:00 PM',
     coach: 'Mike Chen',
     spotsAvailable: 3,
     totalSpots: 15,
-    type: 'strength',
+    type: 'burn40',
   },
   {
     id: '2',
-    title: 'HIIT Circuit',
+    title: 'CrossFit WOD',
     time: '8:00 PM',
     coach: 'Sarah Johnson',
     spotsAvailable: 8,
     totalSpots: 20,
-    type: 'cardio',
+    type: 'crossfit',
   },
   {
     id: '3',
-    title: 'Yoga Flow',
+    title: 'BurnBarbell',
     time: '9:00 AM',
     coach: 'Emma Davis',
     spotsAvailable: 5,
     totalSpots: 12,
-    type: 'flex',
+    type: 'burnbarbell',
   },
   {
     id: '4',
-    title: 'CrossFit',
+    title: 'CrossFit Fundamentals',
     time: '6:00 AM',
     coach: 'John Smith',
     spotsAvailable: 2,
     totalSpots: 15,
-    type: 'strength',
+    type: 'crossfit',
   },
   {
     id: '5',
-    title: 'Spin Class',
+    title: 'Burn40 Cardio',
     time: '5:30 PM',
     coach: 'Lisa Wang',
     spotsAvailable: 10,
     totalSpots: 25,
-    type: 'cardio',
+    type: 'burn40',
   },
 ];
 
@@ -82,14 +83,21 @@ const weekDays = [
 
 const filters = [
   { id: 'all', label: 'All', type: null },
-  { id: 'strength', label: 'Strength', type: 'strength' },
-  { id: 'cardio', label: 'Cardio', type: 'cardio' },
-  { id: 'flex', label: 'Flex', type: 'flex' },
+  { id: 'burn40', label: 'Burn40', type: 'burn40' },
+  { id: 'crossfit', label: 'CrossFit', type: 'crossfit' },
+  { id: 'burnbarbell', label: 'BurnBarbell', type: 'burnbarbell' },
 ];
 
-export const ClassesScreen = () => {
+export const ClassesScreen = ({ navigation }: any) => {
   const [selectedDay, setSelectedDay] = useState('thu');
   const [selectedFilter, setSelectedFilter] = useState('all');
+  const flatListRef = useRef<FlatList>(null);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      flatListRef.current?.scrollToOffset({ offset: 0, animated: false });
+    }, [])
+  );
 
   const filteredClasses = mockClasses.filter((classItem) => {
     const activeFilter = filters.find((f) => f.id === selectedFilter);
@@ -98,7 +106,10 @@ export const ClassesScreen = () => {
   });
 
   const renderClass = ({ item }: { item: ClassItem }) => (
-    <TouchableOpacity activeOpacity={0.7}>
+    <TouchableOpacity 
+      activeOpacity={0.7}
+      onPress={() => navigation.navigate('ClassDetail', { classId: item.id })}
+    >
       <Card style={styles.classCard}>
         <View style={styles.classContent}>
           <View style={styles.classInfo}>
@@ -132,76 +143,81 @@ export const ClassesScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.header}>Classes</Text>
+      <View style={styles.fixedHeader}>
+        <Text style={styles.header}>Classes</Text>
 
-      {/* Weekly Timeline */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.weekContainer}
-        contentContainerStyle={styles.weekContent}
-      >
-        {weekDays.map((day) => (
-          <TouchableOpacity
-            key={day.id}
-            onPress={() => setSelectedDay(day.id)}
-            style={[
-              styles.dayPill,
-              selectedDay === day.id && styles.dayPillActive,
-              day.isToday && styles.dayPillToday,
-            ]}
+        {/* Weekly Timeline */}
+        <View style={styles.weekWrapper}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.weekContainer}
+            contentContainerStyle={styles.weekContent}
           >
-            <Text
-              style={[
-                styles.dayLabel,
-                selectedDay === day.id && styles.dayLabelActive,
-              ]}
-            >
-              {day.label}
-            </Text>
-            <Text
-              style={[
-                styles.dayDate,
-                selectedDay === day.id && styles.dayDateActive,
-              ]}
-            >
-              {day.date}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
-
-      {/* Filter Pills */}
-      <View style={styles.filterContainer}>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.filterContent}
-        >
-          {filters.map((filter) => (
-            <TouchableOpacity
-              key={filter.id}
-              onPress={() => setSelectedFilter(filter.id)}
-              style={[
-                styles.filterPill,
-                selectedFilter === filter.id && styles.filterPillActive,
-              ]}
-            >
-              <Text
+            {weekDays.map((day) => (
+              <TouchableOpacity
+                key={day.id}
+                onPress={() => setSelectedDay(day.id)}
                 style={[
-                  styles.filterText,
-                  selectedFilter === filter.id && styles.filterTextActive,
+                  styles.dayPill,
+                  selectedDay === day.id && styles.dayPillActive,
+                  day.isToday && styles.dayPillToday,
                 ]}
               >
-                {filter.label}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
+                <Text
+                  style={[
+                    styles.dayLabel,
+                    selectedDay === day.id && styles.dayLabelActive,
+                  ]}
+                >
+                  {day.label}
+                </Text>
+                <Text
+                  style={[
+                    styles.dayDate,
+                    selectedDay === day.id && styles.dayDateActive,
+                  ]}
+                >
+                  {day.date}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+
+        {/* Filter Pills */}
+        <View style={styles.filterContainer}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.filterContent}
+          >
+            {filters.map((filter) => (
+              <TouchableOpacity
+                key={filter.id}
+                onPress={() => setSelectedFilter(filter.id)}
+                style={[
+                  styles.filterPill,
+                  selectedFilter === filter.id && styles.filterPillActive,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.filterText,
+                    selectedFilter === filter.id && styles.filterTextActive,
+                  ]}
+                >
+                  {filter.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
       </View>
 
       {/* Class List */}
       <FlatList
+        ref={flatListRef}
         data={filteredClasses}
         renderItem={renderClass}
         keyExtractor={(item) => item.id}
@@ -217,6 +233,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.black,
   },
+  fixedHeader: {
+    backgroundColor: theme.colors.black,
+    zIndex: 10,
+  },
   header: {
     ...theme.typography.heading.h1,
     color: theme.colors.white,
@@ -224,26 +244,31 @@ const styles = StyleSheet.create({
     marginHorizontal: theme.spacing.lg,
     marginBottom: theme.spacing.xl,
   },
+  weekWrapper: {
+    backgroundColor: theme.colors.black,
+  },
   weekContainer: {
-    maxHeight: 80,
-    marginBottom: theme.spacing.lg,
+    height: 80,
   },
   weekContent: {
     paddingHorizontal: theme.spacing.lg,
+    paddingVertical: theme.spacing.xs,
+    paddingBottom: theme.spacing.md,
   },
   dayPill: {
-    paddingHorizontal: theme.spacing.lg,
-    paddingVertical: theme.spacing.md,
-    borderRadius: theme.borderRadius.xl,
-    marginRight: theme.spacing.sm,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    marginRight: theme.spacing.md,
     backgroundColor: theme.colors.charcoal,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   dayPillActive: {
     backgroundColor: theme.colors.accentRed,
   },
   dayPillToday: {
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: theme.colors.accentRed,
   },
   dayLabel: {
@@ -262,23 +287,27 @@ const styles = StyleSheet.create({
     color: theme.colors.white,
   },
   filterContainer: {
-    marginBottom: theme.spacing.lg,
     backgroundColor: theme.colors.black,
-    paddingVertical: theme.spacing.sm,
+    paddingTop: 0,
+    paddingBottom: theme.spacing.sm,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255, 255, 255, 0.1)',
   },
   filterContent: {
     paddingHorizontal: theme.spacing.lg,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   filterPill: {
-    paddingHorizontal: theme.spacing.lg,
+    paddingHorizontal: theme.spacing.md,
     paddingVertical: theme.spacing.sm,
     borderRadius: theme.borderRadius.xl,
     marginRight: theme.spacing.sm,
     backgroundColor: 'transparent',
     borderWidth: 1,
     borderColor: theme.colors.coolGrey,
+    minWidth: 80,
+    alignItems: 'center',
   },
   filterPillActive: {
     backgroundColor: theme.colors.accentRed,
@@ -293,6 +322,7 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingHorizontal: theme.spacing.lg,
+    paddingTop: theme.spacing.md,
     paddingBottom: 100,
   },
   classCard: {

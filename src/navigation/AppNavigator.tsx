@@ -3,6 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { TabNavigator } from './TabNavigator';
 import { WelcomeScreen } from '../screens/WelcomeScreen';
+import { ClassDetailScreen } from '../screens/ClassDetailScreen';
 import { theme } from '../theme';
 
 const Stack = createStackNavigator();
@@ -21,6 +22,7 @@ export const AppNavigator = () => {
       >
         <Stack.Screen name="Welcome" component={WelcomeScreen} />
         <Stack.Screen name="Main" component={TabNavigator} />
+        <Stack.Screen name="ClassDetail" component={ClassDetailScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

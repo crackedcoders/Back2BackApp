@@ -1,8 +1,9 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useRef, useEffect, useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated, Easing } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
-import { useNavigation } from '@react-navigation/native';
+import MCIcon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { theme } from '../theme';
 import { Card, IconButton } from '../components';
@@ -10,8 +11,62 @@ import { TabParamList } from '../navigation/types';
 
 type HomeScreenNavigationProp = BottomTabNavigationProp<TabParamList, 'Home'>;
 
-export const HomeScreen = () => {
+interface HomeScreenProps {
+  userName?: string;
+}
+
+export const HomeScreen: React.FC<HomeScreenProps> = ({ userName }) => {
   const navigation = useNavigation<HomeScreenNavigationProp>();
+  const pulseAnimation = useRef(new Animated.Value(1)).current;
+  const iconFillAnimation = useRef(new Animated.Value(0)).current;
+  const [showFilledIcon, setShowFilledIcon] = useState(false);
+  const scrollViewRef = useRef<ScrollView>(null);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      scrollViewRef.current?.scrollTo({ y: 0, animated: false });
+    }, [])
+  );
+
+  useEffect(() => {
+    // First animate the icon fill
+    Animated.timing(iconFillAnimation, {
+      toValue: 1,
+      duration: 200,
+      easing: Easing.inOut(Easing.ease),
+      useNativeDriver: true,
+    }).start(() => {
+      // After icon animation completes, start pulse
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseAnimation, {
+            toValue: 1.05,
+            duration: 750,
+            easing: Easing.inOut(Easing.ease),
+            useNativeDriver: true,
+          }),
+          Animated.timing(pulseAnimation, {
+            toValue: 1,
+            duration: 750,
+            easing: Easing.inOut(Easing.ease),
+            useNativeDriver: true,
+          }),
+        ])
+      ).start();
+    });
+  }, [iconFillAnimation, pulseAnimation]);
+
+  const getTimeBasedGreeting = () => {
+    const currentHour = new Date().getHours();
+    
+    if (currentHour < 12) {
+      return 'Good morning';
+    } else if (currentHour < 18) {
+      return 'Good afternoon';
+    } else {
+      return 'Good evening';
+    }
+  };
 
   const handleDoorUnlock = () => {
     navigation.navigate('Door');
@@ -24,23 +79,91 @@ export const HomeScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView
+        ref={scrollViewRef}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.header}>Home</Text>
+        {/* Greeting Section */}
+        <View style={styles.greetingSection}>
+          <Text style={styles.greeting}>{getTimeBasedGreeting()}, {userName || 'Guest'}</Text>
+          <Text style={styles.subGreeting}>Ready to crush your workout?</Text>
+        </View>
         
         {/* Streak Card */}
-        <Card style={styles.streakCard}>
-          <View style={styles.streakContent}>
-            <View style={styles.flameContainer}>
-              <Icon name="zap" size={32} color={theme.colors.accentRed} />
+        <Animated.View style={{ transform: [{ scale: pulseAnimation }] }}>
+          <Card style={styles.streakCard}>
+            <View style={styles.streakContent}>
+              <View style={styles.flameContainer}>
+                {/* Soft halo effect */}
+                <Animated.View
+                  style={[
+                    styles.flameHalo,
+                    {
+                      opacity: iconFillAnimation.interpolate({
+                        inputRange: [0, 0.5, 1],
+                        outputRange: [0, 0.2, 0.3],
+                      }),
+                    },
+                  ]}
+                />
+                
+                {/* White outline fire icon (fades out) */}
+                <Animated.View
+                  style={{
+                    position: 'absolute',
+                    opacity: iconFillAnimation.interpolate({
+                      inputRange: [0, 0.3, 1],
+                      outputRange: [1, 0.5, 0],
+                    }),
+                  }}
+                >
+                  <MCIcon name="fire" size={44} color={theme.colors.white} />
+                </Animated.View>
+                
+                {/* Tighter gradient with cleaner colors */}
+                {/* Lemon yellow core */}
+                <Animated.View
+                  style={{
+                    position: 'absolute',
+                    opacity: iconFillAnimation,
+                  }}
+                >
+                  <MCIcon name="fire" size={44} color="#FFF700" />
+                </Animated.View>
+                
+                {/* Orange transition layer */}
+                <Animated.View
+                  style={{
+                    position: 'absolute',
+                    opacity: iconFillAnimation.interpolate({
+                      inputRange: [0, 0.4, 1],
+                      outputRange: [0, 0.85, 0.9],
+                    }),
+                  }}
+                >
+                  <MCIcon name="fire" size={44} color="#FF6B00" style={{ transform: [{ scale: 0.9 }] }} />
+                </Animated.View>
+                
+                {/* Crimson outer layer */}
+                <Animated.View
+                  style={{
+                    position: 'absolute',
+                    opacity: iconFillAnimation.interpolate({
+                      inputRange: [0, 0.6, 1],
+                      outputRange: [0, 0.7, 0.85],
+                    }),
+                  }}
+                >
+                  <MCIcon name="fire" size={44} color="#DC143C" style={{ transform: [{ scale: 0.75 }] }} />
+                </Animated.View>
+              </View>
+              <View style={styles.streakTextContainer}>
+                <Text style={styles.streakText}>8 day streak</Text>
+                <Text style={styles.streakSubtext}>Keep it going!</Text>
+              </View>
             </View>
-            <View style={styles.streakTextContainer}>
-              <Text style={styles.streakNumber}>8-day</Text>
-              <Text style={styles.streakLabel}>streak</Text>
-            </View>
-          </View>
-        </Card>
+          </Card>
+        </Animated.View>
         
         {/* Next Class Tile */}
         <TouchableOpacity onPress={handleClassPress} activeOpacity={0.7}>
@@ -95,38 +218,70 @@ const styles = StyleSheet.create({
     paddingHorizontal: theme.spacing.lg,
     paddingBottom: 100,
   },
-  header: {
+  greetingSection: {
+    marginTop: theme.spacing.xl,
+    marginBottom: theme.spacing.xxl,
+  },
+  greeting: {
     ...theme.typography.heading.h1,
     color: theme.colors.white,
-    marginTop: theme.spacing.lg,
-    marginBottom: theme.spacing.xl,
+    fontWeight: 'bold',
+    marginBottom: theme.spacing.xs,
+  },
+  subGreeting: {
+    ...theme.typography.body.regular,
+    color: theme.colors.coolGrey,
   },
   streakCard: {
     marginBottom: theme.spacing.xl,
+    backgroundColor: theme.colors.accentRed,
+    borderWidth: 0,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
   },
   streakContent: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 8,
   },
   flameContainer: {
+    width: 64,
+    height: 64,
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+  },
+  flameHalo: {
+    position: 'absolute',
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: 'rgba(229, 9, 20, 0.1)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: theme.spacing.lg,
+    backgroundColor: '#FFF700',
+    shadowColor: '#FFF700',
+    shadowOffset: {
+      width: 0,
+      height: 0,
+    },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 6,
   },
   streakTextContainer: {
     flex: 1,
+    justifyContent: 'center',
   },
-  streakNumber: {
-    ...theme.typography.heading.h2,
+  streakText: {
+    ...theme.typography.heading.h3,
     color: theme.colors.white,
+    fontWeight: 'bold',
+    lineHeight: theme.typography.heading.h3.fontSize * 1.2,
   },
-  streakLabel: {
-    ...theme.typography.body.regular,
-    color: theme.colors.text.secondary,
+  streakSubtext: {
+    ...theme.typography.body.small,
+    color: theme.colors.white,
+    opacity: 0.8,
+    lineHeight: theme.typography.body.small.fontSize * 1.4,
+    marginTop: 2,
   },
   classCard: {
     marginBottom: theme.spacing.xl,

@@ -47,10 +47,10 @@ export const WelcomeScreen = () => {
 
   const handleGetStarted = () => {
     if (name && membershipId) {
-      // Navigate to main app
+      // Navigate to main app with user's name
       navigation.reset({
         index: 0,
-        routes: [{ name: 'Main' }],
+        routes: [{ name: 'Main', params: { userName: name } }],
       });
     }
   };
