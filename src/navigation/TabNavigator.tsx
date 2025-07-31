@@ -31,9 +31,7 @@ export const TabNavigator = () => {
           position: 'absolute',
           elevation: 0,
         },
-        tabBarLabelStyle: {
-          ...theme.typography.caption.regular,
-        },
+        tabBarShowLabel: false,
         headerShown: false,
       }}
     >

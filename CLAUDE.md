@@ -20,6 +20,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### iOS-specific
 - `cd ios && pod install` - Install iOS dependencies (required after adding native dependencies)
 - `cd ios && xed .` - Open iOS project in Xcode
+- `bundle install` - Install Ruby dependencies (first time setup)
+- `bundle exec pod install` - Install pods using bundled CocoaPods
 
 ### Android-specific
 - `cd android && ./gradlew clean` - Clean Android build
@@ -27,7 +29,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Architecture
 
-This is a React Native application using TypeScript. The codebase follows standard React Native conventions:
+This is a React Native application for Back2Back fitness studio. The app features:
+
+- **Navigation**: Stack navigator with bottom tabs
+  - Welcome screen → Main app (tabs)
+  - Tab screens: Home, Classes, Door, Progress, Profile
+  - Class detail screen (from Classes tab)
 
 - **Entry Point**: `index.js` registers the main App component from `App.tsx`
 - **Platform Code**: 
@@ -37,9 +44,18 @@ This is a React Native application using TypeScript. The codebase follows standa
 - **Tests**: `__tests__/` directory contains Jest tests
 - **Source Code Structure**:
   - `/src/theme/` - Design system (colors, typography, spacing)
-  - `/src/components/` - Reusable UI components
+  - `/src/components/` - Reusable UI components (Button, Card, IconButton)
   - `/src/screens/` - Screen components for each navigation route
   - `/src/navigation/` - React Navigation setup with bottom tabs
+  - `/src/utils/` - Utility functions and helpers
+
+## Key Dependencies
+
+- **Navigation**: @react-navigation/native, @react-navigation/stack, @react-navigation/bottom-tabs
+- **UI Components**: react-native-vector-icons (Feather icons), react-native-svg
+- **Gesture Handling**: react-native-gesture-handler
+- **Safe Area**: react-native-safe-area-context
+- **Screens**: react-native-screens
 
 ## Key Configurations
 
@@ -49,9 +65,12 @@ This is a React Native application using TypeScript. The codebase follows standa
   - Prettier with single quotes, trailing commas, arrow parens avoid
 - **Metro Bundler**: Default React Native configuration in `metro.config.js`
 - **Node Version**: Requires Node.js >= 18
+- **Testing**: Jest with react-native preset
 
 ## Development Notes
 
 - Always run `npm start` before launching the app on iOS or Android
 - After adding native dependencies, rebuild: iOS requires `pod install`, Android requires rebuild
 - The app currently uses React 19.1.0 and React Native 0.80.2
+- App uses a dark theme with black background and red accent colors
+- Bottom tab navigation persists across screens except Welcome and ClassDetail
