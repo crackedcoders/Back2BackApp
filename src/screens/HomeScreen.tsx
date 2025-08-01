@@ -59,7 +59,6 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ userName }) => {
   const autoScrollTimer = useRef<NodeJS.Timeout | null>(null);
   const [selectedAnnouncement, setSelectedAnnouncement] = useState<Announcement | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
-  const [testModalVisible, setTestModalVisible] = useState(false);
   const underlineAnimation = useRef(new Animated.Value(1)).current;
   const modalAnimation = useRef(new Animated.Value(0)).current;
   const modalSlideAnimation = useRef(new Animated.Value(50)).current;
@@ -236,14 +235,6 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ userName }) => {
       }
       closeAnnouncementModal();
     }
-  };
-
-  const openTestModal = () => {
-    setTestModalVisible(true);
-  };
-
-  const closeTestModal = () => {
-    setTestModalVisible(false);
   };
 
   const renderAnnouncement = ({ item }: { item: Announcement }) => (
@@ -430,16 +421,6 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ userName }) => {
             </View>
           </Card>
         </TouchableOpacity>
-
-        {/* Test Button */}
-        <TouchableOpacity onPress={openTestModal} activeOpacity={0.7}>
-          <Card style={styles.classCard}>
-            <View style={styles.classHeader}>
-              <Text style={styles.classTitle}>Test Scrollable Modal</Text>
-              <Text style={styles.spotsText}>Debug scrolling</Text>
-            </View>
-          </Card>
-        </TouchableOpacity>
       </ScrollView>
       
       {/* Announcement Modal */}
@@ -496,59 +477,6 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ userName }) => {
             </View>
           </Animated.View>
         </Animated.View>
-      </Modal>
-
-      {/* Test Modal */}
-      <Modal
-        visible={testModalVisible}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={closeTestModal}
-      >
-        <View style={styles.testModalBackdrop}>
-          <View style={styles.testModalContent}>
-            <View style={styles.testModalHeader}>
-              <Text style={styles.testModalTitle}>Test Scrollable Content</Text>
-              <TouchableOpacity onPress={closeTestModal}>
-                <Icon name="x" size={24} color={theme.colors.white} />
-              </TouchableOpacity>
-            </View>
-            
-            <ScrollView style={styles.testModalBody} showsVerticalScrollIndicator={true}>
-              <Text style={styles.modalBodyText}>
-                This is a test modal to debug scrolling issues.{'\n\n'}
-                
-                Line 1: Lorem ipsum dolor sit amet, consectetur adipiscing elit.{'\n'}
-                Line 2: Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.{'\n'}
-                Line 3: Ut enim ad minim veniam, quis nostrud exercitation ullamco.{'\n'}
-                Line 4: Laboris nisi ut aliquip ex ea commodo consequat.{'\n'}
-                Line 5: Duis aute irure dolor in reprehenderit in voluptate velit esse.{'\n'}
-                Line 6: Cillum dolore eu fugiat nulla pariatur.{'\n'}
-                Line 7: Excepteur sint occaecat cupidatat non proident.{'\n'}
-                Line 8: Sunt in culpa qui officia deserunt mollit anim id est laborum.{'\n\n'}
-                
-                Line 9: More content to test scrolling...{'\n'}
-                Line 10: This should definitely require scrolling.{'\n'}
-                Line 11: Keep adding more lines to test.{'\n'}
-                Line 12: The modal should be scrollable now.{'\n'}
-                Line 13: If you can see this, scrolling works!{'\n'}
-                Line 14: Testing vertical scroll behavior.{'\n'}
-                Line 15: This is getting quite long now.{'\n'}
-                Line 16: Should definitely need to scroll.{'\n'}
-                Line 17: More test content here.{'\n'}
-                Line 18: And even more content.{'\n'}
-                Line 19: This should be enough to test.{'\n'}
-                Line 20: Final line for testing scrolling.
-              </Text>
-            </ScrollView>
-            
-            <View style={styles.testModalFooter}>
-              <TouchableOpacity style={styles.markAsReadButton} onPress={closeTestModal}>
-                <Text style={styles.markAsReadText}>Close Test</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
       </Modal>
       
       {/* Floating Door Unlock Button */}
@@ -839,46 +767,5 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 4.65,
     elevation: 8,
-  },
-  // Test Modal Styles
-  testModalBackdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: theme.spacing.xl,
-  },
-  testModalContent: {
-    width: '100%',
-    height: '70%', // Fixed height to test scrolling
-    backgroundColor: theme.colors.charcoal,
-    borderRadius: theme.borderRadius.lg,
-    borderWidth: 1,
-    borderColor: theme.colors.accentRed,
-    overflow: 'hidden',
-  },
-  testModalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: theme.spacing.lg,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  testModalTitle: {
-    ...theme.typography.heading.h3,
-    color: theme.colors.white,
-    fontWeight: 'bold',
-    flex: 1,
-    marginRight: theme.spacing.md,
-  },
-  testModalBody: {
-    flex: 1,
-    padding: theme.spacing.lg,
-  },
-  testModalFooter: {
-    padding: theme.spacing.lg,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
   },
 });

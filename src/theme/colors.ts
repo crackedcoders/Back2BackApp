@@ -4,6 +4,8 @@ export const colors = {
   charcoal: '#1A1A1A',
   white: '#FFFFFF',
   coolGrey: '#8A8A8A',
+  yellow: '#FFC107',
+  green: '#4CAF50',
   
   text: {
     primary: '#FFFFFF',

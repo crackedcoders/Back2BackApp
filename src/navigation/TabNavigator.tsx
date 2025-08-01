@@ -5,7 +5,7 @@ import { theme } from '../theme';
 import { HomeScreen } from '../screens/HomeScreen';
 import { ClassesScreen } from '../screens/ClassesScreen';
 import { DoorScreen } from '../screens/DoorScreen';
-import { ProgressScreen } from '../screens/ProgressScreen';
+import { TimerScreen } from '../screens/TimerScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { useRoute, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from './types';
@@ -64,11 +64,11 @@ export const TabNavigator = () => {
         }}
       />
       <Tab.Screen
-        name="Progress"
-        component={ProgressScreen}
+        name="Timer"
+        component={TimerScreen}
         options={{
           tabBarIcon: ({ color }) => (
-            <Icon name="activity" color={color} size={24} />
+            <Icon name="clock" color={color} size={24} />
           ),
         }}
       />

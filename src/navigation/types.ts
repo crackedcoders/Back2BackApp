@@ -8,6 +8,6 @@ export type TabParamList = {
   Home: { userName?: string };
   Classes: undefined;
   Door: undefined;
-  Progress: undefined;
+  Timer: undefined;
   Profile: undefined;
 };
