@@ -8,10 +8,12 @@ import {
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/Feather';
 import { theme } from '../theme';
 import { Card } from '../components/Card';
+import { RootStackParamList } from '../navigation/types';
 
 const stats = [
   { label: 'Total Visits', value: '156', icon: 'activity' },
@@ -29,8 +31,11 @@ const menuItems = [
   { title: 'Sign Out', icon: 'log-out', action: 'signout', isDestructive: true },
 ];
 
+type ProfileScreenNavigationProp = StackNavigationProp<RootStackParamList>;
+
 export const ProfileScreen = () => {
   const scrollViewRef = useRef<ScrollView>(null);
+  const navigation = useNavigation<ProfileScreenNavigationProp>();
 
   useFocusEffect(
     React.useCallback(() => {
@@ -47,6 +52,8 @@ export const ProfileScreen = () => {
           { text: 'Sign Out', style: 'destructive', onPress: () => console.log('Sign out') },
         ],
       );
+    } else if (action === 'settings') {
+      navigation.navigate('ProfileSettings');
     } else {
       console.log(`Navigate to ${action}`);
     }

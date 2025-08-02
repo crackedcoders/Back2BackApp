@@ -2,6 +2,7 @@ export type RootStackParamList = {
   Welcome: undefined;
   Main: { userName?: string };
   ClassDetail: { classId: string };
+  ProfileSettings: undefined;
 };
 
 export type TabParamList = {
