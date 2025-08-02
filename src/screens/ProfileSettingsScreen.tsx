@@ -173,7 +173,7 @@ export const ProfileSettingsScreen = ({ route }: any) => {
   const [marketingEnabled, setMarketingEnabled] = useState(false);
 
   // Personal Info tab state
-  const [userInfo, setUserInfo] = useState<UserInfo>({
+  const [, setUserInfo] = useState<UserInfo>({
     fullName: '',
     email: '',
     phoneNumber: '',
@@ -842,7 +842,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   locationName: {
-    ...theme.typography.body.large,
+    ...theme.typography.body.medium,
+    fontSize: 17,
     color: theme.colors.white,
     fontWeight: '600',
     marginBottom: theme.spacing.xs,
@@ -900,7 +901,8 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.sm,
   },
   quickToggleTitle: {
-    ...theme.typography.body.large,
+    ...theme.typography.body.medium,
+    fontSize: 17,
     color: theme.colors.white,
     fontWeight: '600',
     marginLeft: theme.spacing.sm,
@@ -1019,7 +1021,8 @@ const styles = StyleSheet.create({
     gap: theme.spacing.sm,
   },
   membershipName: {
-    ...theme.typography.body.large,
+    ...theme.typography.body.medium,
+    fontSize: 17,
     color: theme.colors.white,
     fontWeight: '600',
   },
@@ -1055,7 +1058,8 @@ const styles = StyleSheet.create({
     marginLeft: theme.spacing.sm,
   },
   membershipFromPrice: {
-    ...theme.typography.body.large,
+    ...theme.typography.body.medium,
+    fontSize: 17,
     color: theme.colors.white,
   },
   featuresContainer: {

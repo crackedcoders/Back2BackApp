@@ -172,55 +172,43 @@ export const ClassCard: React.FC<ClassCardProps> = ({
         delayLongPress={500}
       >
         <View style={styles.card}>
-          {/* Left side - Instructor avatar or class icon */}
-          <View style={styles.avatarContainer}>
-            {instructorAvatarUrl ? (
-              <Image 
-                source={{ uri: instructorAvatarUrl }} 
-                style={styles.avatar}
-              />
-            ) : (
-              <View style={styles.avatarPlaceholder}>
-                <Icon name="user" size={24} color={theme.colors.white} />
-              </View>
-            )}
-          </View>
-          
-          {/* Right side - Class info */}
-          <View style={styles.contentContainer}>
-            {/* Header - Title and time */}
-            <View style={styles.header}>
-              <View style={styles.titleRow}>
+          {/* Main content */}
+          <View style={styles.content}>
+            {/* Header section with title and time aligned */}
+            <View style={styles.headerSection}>
+              <View style={styles.leftSection}>
                 <Text style={styles.title} numberOfLines={1}>{title}</Text>
-                <View style={styles.dateTimeContainer}>
-                  <Text style={styles.date}>{date}</Text>
-                  <Text style={styles.time}>{time}</Text>
+                {/* Info directly under title */}
+                <View style={styles.infoColumn}>
+                  <View style={styles.infoRow}>
+                    <Icon name="user" size={16} color={theme.colors.accentRed} />
+                    <Text style={styles.infoText}>{instructorName}</Text>
+                  </View>
+                  <View style={styles.infoRow}>
+                    <Icon name="map-pin" size={16} color={theme.colors.accentRed} />
+                    <Text style={styles.infoText}>{location}</Text>
+                  </View>
                 </View>
               </View>
-            </View>
-            
-            {/* Sub info - Instructor and location */}
-            <View style={styles.subInfo}>
-              <View style={styles.infoItem}>
-                <Icon name="user" size={12} color={theme.colors.coolGrey} />
-                <Text style={styles.infoText}>{instructorName}</Text>
-              </View>
-              <View style={styles.infoItem}>
-                <Icon name="map-pin" size={12} color={theme.colors.coolGrey} />
-                <Text style={styles.infoText}>{location}</Text>
+              
+              <View style={styles.timeContainer}>
+                <Text style={styles.date}>{date}</Text>
+                <Text style={styles.time}>{time}</Text>
               </View>
             </View>
             
-            {/* Bottom - Progress bar and spots */}
-            <View style={styles.progressContainer}>
-              <View style={styles.progressBar}>
-                <View 
-                  style={[
-                    styles.progressFill, 
-                    { width: `${percentageFull}%` },
-                    isAlmostFull && styles.progressFillAlmostFull
-                  ]} 
-                />
+            {/* Bottom row - Progress and Spots */}
+            <View style={styles.bottomRow}>
+              <View style={styles.progressContainer}>
+                <View style={styles.progressBar}>
+                  <View 
+                    style={[
+                      styles.progressFill, 
+                      { width: `${percentageFull}%` },
+                      isAlmostFull && styles.progressFillAlmostFull
+                    ]} 
+                  />
+                </View>
               </View>
               <Text style={[
                 styles.spotsText,
@@ -231,8 +219,8 @@ export const ClassCard: React.FC<ClassCardProps> = ({
             </View>
           </View>
           
-          {/* Chevron indicator */}
-          <View style={styles.chevronContainer}>
+          {/* Arrow indicator */}
+          <View style={styles.arrowContainer}>
             <Icon name="chevron-right" size={20} color={theme.colors.coolGrey} />
           </View>
         </View>
@@ -244,113 +232,114 @@ export const ClassCard: React.FC<ClassCardProps> = ({
 const styles = StyleSheet.create({
   card: {
     backgroundColor: theme.colors.charcoal,
-    borderRadius: theme.borderRadius.xl,
+    borderRadius: theme.borderRadius.lg,
+    marginBottom: theme.spacing.xl,
     flexDirection: 'row',
     alignItems: 'center',
-    padding: theme.spacing.lg,
-    marginHorizontal: theme.spacing.xl,
-    marginBottom: theme.spacing.md,
-    // Shadow for iOS
+    paddingVertical: theme.spacing.lg,
+    paddingHorizontal: theme.spacing.lg,
+    minHeight: 90,
+    // Clean shadow
     shadowColor: theme.colors.black,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
     shadowRadius: 8,
-    // Elevation for Android
-    elevation: 5,
+    elevation: 4,
   },
-  avatarContainer: {
-    marginRight: theme.spacing.lg,
-  },
-  avatar: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: theme.colors.coolGrey,
-  },
-  avatarPlaceholder: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: `${theme.colors.accentRed}20`,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  contentContainer: {
+  content: {
     flex: 1,
+    gap: theme.spacing.xs, // Reduced overall gap between sections
   },
-  header: {
-    marginBottom: theme.spacing.sm,
-  },
-  titleRow: {
+  headerSection: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
+    marginBottom: theme.spacing.sm,
   },
-  title: {
-    ...theme.typography.heading.h3,
-    color: theme.colors.white,
+  leftSection: {
     flex: 1,
     marginRight: theme.spacing.md,
   },
-  dateTimeContainer: {
+  title: {
+    ...theme.typography.heading.h3,
+    fontSize: 20,
+    fontWeight: '700',
+    color: theme.colors.white,
+    marginBottom: theme.spacing.xs, // Small gap before info
+  },
+  infoColumn: {
+    gap: 2, // Very tight gap between instructor and location
+  },
+  timeContainer: {
     alignItems: 'flex-end',
+    alignSelf: 'flex-start', // Align with title baseline
   },
   date: {
     ...theme.typography.body.small,
+    fontSize: 12,
     color: theme.colors.coolGrey,
     marginBottom: 2,
   },
   time: {
-    ...theme.typography.body.large,
-    color: theme.colors.white,
-    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+    ...theme.typography.body.medium,
+    fontSize: 18,
     fontWeight: '600',
+    color: theme.colors.white,
   },
-  subInfo: {
-    flexDirection: 'row',
-    marginBottom: theme.spacing.md,
-    gap: theme.spacing.lg,
-  },
-  infoItem: {
+  infoRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: theme.spacing.xs,
+    flex: 1,
   },
   infoText: {
     ...theme.typography.body.small,
+    fontSize: 14,
     color: theme.colors.coolGrey,
+    flex: 1,
   },
-  progressContainer: {
+  bottomRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: theme.spacing.md,
+    paddingRight: theme.spacing.xs, // Add small padding to prevent overflow
+  },
+  progressContainer: {
+    flex: 1,
+    maxWidth: '70%', // Constrain progress bar width
   },
   progressBar: {
-    flex: 1,
-    height: 6,
-    backgroundColor: `${theme.colors.white}10`,
-    borderRadius: 3,
+    height: 4,
+    backgroundColor: `${theme.colors.white}15`,
+    borderRadius: 2,
     overflow: 'hidden',
+    width: '100%', // Ensure it stays within container
   },
   progressFill: {
     height: '100%',
     backgroundColor: theme.colors.accentRed,
-    borderRadius: 3,
+    borderRadius: 2,
   },
   progressFillAlmostFull: {
-    backgroundColor: theme.colors.yellow,
+    backgroundColor: '#FF8C00',
   },
   spotsText: {
     ...theme.typography.body.small,
+    fontSize: 13,
     color: theme.colors.coolGrey,
-    minWidth: 70,
+    fontWeight: '500',
+    minWidth: 80,
     textAlign: 'right',
   },
   spotsTextUrgent: {
-    color: theme.colors.yellow,
+    color: '#FF8C00',
     fontWeight: '600',
   },
-  chevronContainer: {
+  arrowContainer: {
     marginLeft: theme.spacing.md,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 24,
+    height: 24,
   },
 });
