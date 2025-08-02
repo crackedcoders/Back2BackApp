@@ -2,7 +2,7 @@ export type RootStackParamList = {
   Welcome: undefined;
   Main: { userName?: string };
   ClassDetail: { classId: string };
-  ProfileSettings: undefined;
+  ProfileSettings: { initialTab?: 'gym' | 'personal' | 'membership' } | undefined;
 };
 
 export type TabParamList = {

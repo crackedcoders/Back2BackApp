@@ -6,7 +6,7 @@ import MCIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { theme } from '../theme';
-import { Card, IconButton } from '../components';
+import { Card, IconButton, ClassCard } from '../components';
 import { TabParamList } from '../navigation/types';
 
 type HomeScreenNavigationProp = BottomTabNavigationProp<TabParamList, 'Home'>;
@@ -407,20 +407,25 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ userName }) => {
           </Card>
         </Animated.View>
         
-        {/* Next Class Tile */}
-        <TouchableOpacity onPress={handleClassPress} activeOpacity={0.7}>
-          <Card style={styles.classCard}>
-            <View style={styles.classHeader}>
-              <Text style={styles.classTitle}>Next: Power Lift 7 PM</Text>
-              <Text style={styles.spotsText}>4 spots left</Text>
-            </View>
-            <View style={styles.progressContainer}>
-              <View style={styles.progressBackground}>
-                <View style={styles.progressBar} />
-              </View>
-            </View>
-          </Card>
-        </TouchableOpacity>
+        {/* Next Class Card */}
+        <ClassCard
+          classId="class-1"
+          title="Power Lift"
+          dateTime={new Date(Date.now() + 3 * 60 * 60 * 1000)} // 3 hours from now
+          instructorName="Sarah Johnson"
+          instructorAvatarUrl={undefined}
+          spotsLeft={4}
+          capacity={15}
+          location="Downtown"
+          onCancel={() => {
+            console.log('Cancel class');
+            // Implement cancel logic
+          }}
+          onViewMap={() => {
+            console.log('View map');
+            // Implement map view logic
+          }}
+        />
       </ScrollView>
       
       {/* Announcement Modal */}
@@ -565,36 +570,6 @@ const styles = StyleSheet.create({
     opacity: 0.8,
     lineHeight: (theme.typography.body.small.fontSize || 14) * 1.4,
     marginTop: 2,
-  },
-  classCard: {
-    marginBottom: theme.spacing.xl,
-  },
-  classHeader: {
-    marginBottom: theme.spacing.md,
-  },
-  classTitle: {
-    ...theme.typography.heading.h4,
-    color: theme.colors.white,
-    marginBottom: theme.spacing.xs,
-  },
-  spotsText: {
-    ...theme.typography.body.small,
-    color: theme.colors.text.secondary,
-  },
-  progressContainer: {
-    marginTop: theme.spacing.sm,
-  },
-  progressBackground: {
-    height: 6,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 3,
-    overflow: 'hidden',
-  },
-  progressBar: {
-    height: '100%',
-    backgroundColor: theme.colors.accentRed,
-    borderRadius: 3,
-    width: '60%',
   },
   announcementsContainer: {
     marginBottom: theme.spacing.xl,

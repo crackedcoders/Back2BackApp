@@ -54,6 +54,10 @@ export const ProfileScreen = () => {
       );
     } else if (action === 'settings') {
       navigation.navigate('ProfileSettings');
+    } else if (action === 'personal') {
+      navigation.navigate('ProfileSettings', { initialTab: 'personal' });
+    } else if (action === 'membership') {
+      navigation.navigate('ProfileSettings', { initialTab: 'membership' });
     } else {
       console.log(`Navigate to ${action}`);
     }
