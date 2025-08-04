@@ -3,6 +3,8 @@ export type RootStackParamList = {
   Main: { userName?: string };
   ClassDetail: { classId: string };
   ProfileSettings: { initialTab?: 'gym' | 'personal' | 'membership' } | undefined;
+  CheckInHistory: undefined;
+  ClassAttendanceHistory: undefined;
 };
 
 export type TabParamList = {

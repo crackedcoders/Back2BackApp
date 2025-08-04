@@ -5,6 +5,8 @@ import { TabNavigator } from './TabNavigator';
 import { WelcomeScreen } from '../screens/WelcomeScreen';
 import { ClassDetailScreen } from '../screens/ClassDetailScreen';
 import { ProfileSettingsScreen } from '../screens/ProfileSettingsScreen';
+import { CheckInHistoryScreen } from '../screens/CheckInHistoryScreen';
+import { ClassAttendanceHistoryScreen } from '../screens/ClassAttendanceHistoryScreen';
 import { theme } from '../theme';
 
 const Stack = createStackNavigator();
@@ -25,6 +27,8 @@ export const AppNavigator = () => {
         <Stack.Screen name="Main" component={TabNavigator} />
         <Stack.Screen name="ClassDetail" component={ClassDetailScreen} />
         <Stack.Screen name="ProfileSettings" component={ProfileSettingsScreen} />
+        <Stack.Screen name="CheckInHistory" component={CheckInHistoryScreen} />
+        <Stack.Screen name="ClassAttendanceHistory" component={ClassAttendanceHistoryScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

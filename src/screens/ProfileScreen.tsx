@@ -42,6 +42,14 @@ export const ProfileScreen = () => {
       scrollViewRef.current?.scrollTo({ y: 0, animated: false });
     }, [])
   );
+  const handleStatPress = (statLabel: string) => {
+    if (statLabel === 'Total Visits') {
+      navigation.navigate('CheckInHistory');
+    } else if (statLabel === 'Classes Attended') {
+      navigation.navigate('ClassAttendanceHistory');
+    }
+  };
+
   const handleMenuPress = (action: string) => {
     if (action === 'signout') {
       Alert.alert(
@@ -86,13 +94,30 @@ export const ProfileScreen = () => {
 
         {/* Stats Grid */}
         <View style={styles.statsContainer}>
-          {stats.map((stat, index) => (
-            <Card key={index} style={styles.statCard}>
-              <Icon name={stat.icon} size={20} color={theme.colors.accentRed} />
-              <Text style={styles.statValue}>{stat.value}</Text>
-              <Text style={styles.statLabel}>{stat.label}</Text>
-            </Card>
-          ))}
+          {stats.map((stat, index) => {
+            const isClickable = stat.label === 'Total Visits' || stat.label === 'Classes Attended';
+            const StatComponent = isClickable ? TouchableOpacity : View;
+            
+            return (
+              <StatComponent 
+                key={index} 
+                style={[styles.statCard, isClickable && styles.clickableStatCard]}
+                onPress={isClickable ? () => handleStatPress(stat.label) : undefined}
+                activeOpacity={isClickable ? 0.7 : 1}
+              >
+                <Card style={styles.statCardInner}>
+                  <Icon name={stat.icon} size={20} color={theme.colors.accentRed} />
+                  <Text style={styles.statValue}>{stat.value}</Text>
+                  <Text style={styles.statLabel}>{stat.label}</Text>
+                  {isClickable && (
+                    <View style={styles.clickIndicator}>
+                      <Icon name="chevron-right" size={16} color={theme.colors.coolGrey} />
+                    </View>
+                  )}
+                </Card>
+              </StatComponent>
+            );
+          })}
         </View>
 
         {/* Menu Items */}
@@ -187,8 +212,19 @@ const styles = StyleSheet.create({
   statCard: {
     width: '48%',
     marginBottom: theme.spacing.md,
+  },
+  clickableStatCard: {
+    // Add any specific styles for clickable cards if needed
+  },
+  statCardInner: {
     padding: theme.spacing.lg,
     alignItems: 'center',
+    position: 'relative',
+  },
+  clickIndicator: {
+    position: 'absolute',
+    top: theme.spacing.sm,
+    right: theme.spacing.sm,
   },
   statValue: {
     ...theme.typography.heading.h3,
